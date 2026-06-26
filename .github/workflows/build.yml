@@ -54,7 +54,7 @@ jobs:
 
       - name: Apply patches
         run: |
-          sed -i 's|<project.branch></project.branch>|<project.branch>developer</project.branch>|' pom.xml
+          sed -i 's|<project.branch></project.branch>|<project.branch>patched</project.branch>|' pom.xml
           sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
       - name: Set up JDK 25
@@ -105,7 +105,7 @@ jobs:
 
       - name: Apply patches
         run: |
-          sed -i 's|<project.branch></project.branch>|<project.branch>developer</project.branch>|' pom.xml
+          sed -i 's|<project.branch></project.branch>|<project.branch>patched</project.branch>|' pom.xml
           sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
       - name: Set up JDK 25
