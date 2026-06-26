@@ -11,15 +11,6 @@ Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) with C
 
 A GitHub Actions workflow runs daily, checks for upstream changes, applies patches to remove CE restrictions, and publishes a new release only if something changed.
 
-## Security audit
+## Security
 
-Scanned with [zizmor](https://docs.zizmor.sh) v1.26.1 — **0 findings**.
-
-The workflow is hardened as follows:
-
-- All actions pinned to commit hashes (not mutable tags)
-- Top-level `permissions: {}` deny-all, with least-privilege grants per job
-- `persist-credentials: false` on all checkout steps
-- No Maven dependency cache (eliminates cache-poisoning attack surface)
-- No third-party release actions — uses the built-in `gh` CLI instead
-- Template expressions passed via `env:` rather than inline in `run:` shells
+The workflow is scanned on every push with [zizmor](https://docs.zizmor.sh). You can view the latest report under the **Security → Code scanning** tab of this repo.
