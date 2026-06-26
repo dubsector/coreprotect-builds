@@ -67,9 +67,12 @@ jobs:
       - name: Build
         run: mvn clean install -q
 
-      - name: Get version
+      - name: Get version and MC range
         id: ver
-        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+        run: |
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          echo "mc_min=$(grep -oP '(?<=MINECRAFT_VERSION = ")[^"]+' src/main/java/net/coreprotect/config/ConfigHandler.java)" >> $GITHUB_OUTPUT
+          echo "mc_max=$(grep -oP '(?<=LATEST_VERSION = ")[^"]+' src/main/java/net/coreprotect/config/ConfigHandler.java)" >> $GITHUB_OUTPUT
 
       - name: Rename JAR
         run: mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar target/CoreProtect-${{ steps.ver.outputs.version }}-dev+${{ needs.check.outputs.dev_short_sha }}.jar
@@ -83,7 +86,8 @@ jobs:
           body: |
             > ⚠️ Development build — use at your own risk
 
-            Built from upstream master @ `${{ needs.check.outputs.dev_sha }}`
+            **Minecraft:** ${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}
+            **Built from:** upstream master @ `${{ needs.check.outputs.dev_sha }}`
           files: target/CoreProtect-*.jar
 
   stable:
@@ -114,9 +118,12 @@ jobs:
       - name: Build
         run: mvn clean install -q
 
-      - name: Get version
+      - name: Get version and MC range
         id: ver
-        run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+        run: |
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          echo "mc_min=$(grep -oP '(?<=MINECRAFT_VERSION = ")[^"]+' src/main/java/net/coreprotect/config/ConfigHandler.java)" >> $GITHUB_OUTPUT
+          echo "mc_max=$(grep -oP '(?<=LATEST_VERSION = ")[^"]+' src/main/java/net/coreprotect/config/ConfigHandler.java)" >> $GITHUB_OUTPUT
 
       - name: Rename JAR
         run: mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar target/CoreProtect-${{ steps.ver.outputs.version }}-stable.jar
@@ -128,5 +135,6 @@ jobs:
           name: CoreProtect ${{ steps.ver.outputs.version }} Stable (${{ needs.check.outputs.stable_tag }})
           prerelease: false
           body: |
-            Built from upstream tag `${{ needs.check.outputs.stable_tag }}`
+            **Minecraft:** ${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}
+            **Built from:** upstream tag `${{ needs.check.outputs.stable_tag }}`
           files: target/CoreProtect-*.jar
