@@ -5,9 +5,13 @@ on:
   schedule:
     - cron: '0 6 * * *'
 
+permissions: {}
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       build_dev: ${{ steps.check.outputs.build_dev }}
       build_stable: ${{ steps.check.outputs.build_stable }}
@@ -48,9 +52,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout CoreProtect
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: PlayPro/CoreProtect
+          persist-credentials: false
 
       - name: Apply patches
         run: |
@@ -58,11 +63,10 @@ jobs:
           sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           java-version: '25'
           distribution: 'temurin'
-          cache: maven
 
       - name: Build
         run: mvn clean install -q
@@ -75,20 +79,29 @@ jobs:
           echo "mc_max=$(grep -oP '(?<=LATEST_VERSION = ")[^"]+' src/main/java/net/coreprotect/config/ConfigHandler.java)" >> $GITHUB_OUTPUT
 
       - name: Rename JAR
-        run: mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar target/CoreProtect-${{ steps.ver.outputs.version }}-dev+${{ needs.check.outputs.dev_short_sha }}.jar
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          SHORT_SHA: ${{ needs.check.outputs.dev_short_sha }}
+        run: mv target/CoreProtect-${VERSION}.jar target/CoreProtect-${VERSION}-dev+${SHORT_SHA}.jar
 
       - name: Publish release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: dev-${{ needs.check.outputs.dev_short_sha }}
-          name: CoreProtect ${{ steps.ver.outputs.version }} Dev (${{ needs.check.outputs.dev_short_sha }})
-          prerelease: true
-          body: |
-            > ⚠️ Development build — use at your own risk
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          SHORT_SHA: ${{ needs.check.outputs.dev_short_sha }}
+          DEV_SHA: ${{ needs.check.outputs.dev_sha }}
+          MC_MIN: ${{ steps.ver.outputs.mc_min }}
+          MC_MAX: ${{ steps.ver.outputs.mc_max }}
+        run: |
+          gh release create "dev-${SHORT_SHA}" \
+            --repo "${{ github.repository }}" \
+            --title "CoreProtect ${VERSION} Dev (${SHORT_SHA})" \
+            --prerelease \
+            --notes "> ⚠️ Development build — use at your own risk
 
-            **Minecraft:** `${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}`
-            Built from upstream master @ `${{ needs.check.outputs.dev_sha }}`
-          files: target/CoreProtect-*.jar
+          **Minecraft:** \`${MC_MIN} – ${MC_MAX}\`
+          Built from upstream master @ \`${DEV_SHA}\`" \
+            target/CoreProtect-*.jar
 
   stable:
     needs: check
@@ -98,10 +111,11 @@ jobs:
       contents: write
     steps:
       - name: Checkout CoreProtect
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: PlayPro/CoreProtect
           ref: ${{ needs.check.outputs.stable_tag }}
+          persist-credentials: false
 
       - name: Apply patches
         run: |
@@ -109,11 +123,10 @@ jobs:
           sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           java-version: '25'
           distribution: 'temurin'
-          cache: maven
 
       - name: Build
         run: mvn clean install -q
@@ -126,15 +139,21 @@ jobs:
           echo "mc_max=$(grep -oP '(?<=LATEST_VERSION = ")[^"]+' src/main/java/net/coreprotect/config/ConfigHandler.java)" >> $GITHUB_OUTPUT
 
       - name: Rename JAR
-        run: mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar target/CoreProtect-${{ steps.ver.outputs.version }}-stable.jar
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: mv target/CoreProtect-${VERSION}.jar target/CoreProtect-${VERSION}-stable.jar
 
       - name: Publish release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: stable-${{ needs.check.outputs.stable_tag }}
-          name: CoreProtect ${{ steps.ver.outputs.version }} Stable (${{ needs.check.outputs.stable_tag }})
-          prerelease: false
-          body: |
-            **Minecraft:** `${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}`
-            Built from upstream tag `${{ needs.check.outputs.stable_tag }}`
-          files: target/CoreProtect-*.jar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          STABLE_TAG: ${{ needs.check.outputs.stable_tag }}
+          MC_MIN: ${{ steps.ver.outputs.mc_min }}
+          MC_MAX: ${{ steps.ver.outputs.mc_max }}
+        run: |
+          gh release create "stable-${STABLE_TAG}" \
+            --repo "${{ github.repository }}" \
+            --title "CoreProtect ${VERSION} Stable (${STABLE_TAG})" \
+            --notes "**Minecraft:** \`${MC_MIN} – ${MC_MAX}\`
+          Built from upstream tag \`${STABLE_TAG}\`" \
+            target/CoreProtect-*.jar
