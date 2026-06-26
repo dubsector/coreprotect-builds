@@ -1,9 +1,9 @@
 name: CoreProtect Build
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 6 * * *'
-  workflow_dispatch:
 
 jobs:
   check:
@@ -15,7 +15,8 @@ jobs:
       dev_short_sha: ${{ steps.check.outputs.dev_short_sha }}
       stable_tag: ${{ steps.check.outputs.stable_tag }}
     steps:
-      - id: check
+      - name: Check upstream for changes
+        id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -24,17 +25,20 @@ jobs:
           echo "dev_sha=$DEV_SHA" >> $GITHUB_OUTPUT
           echo "dev_short_sha=$DEV_SHORT" >> $GITHUB_OUTPUT
 
-          gh release view "dev-$DEV_SHORT" --repo ${{ github.repository }} > /dev/null 2>&1 \
-            && echo "build_dev=false" >> $GITHUB_OUTPUT \
-            || echo "build_dev=true" >> $GITHUB_OUTPUT
+          if gh release view "dev-$DEV_SHORT" --repo ${{ github.repository }} > /dev/null 2>&1; then
+            echo "build_dev=false" >> $GITHUB_OUTPUT
+          else
+            echo "build_dev=true" >> $GITHUB_OUTPUT
+          fi
 
-          STABLE_TAG=$(git ls-remote --tags https://github.com/PlayPro/CoreProtect.git \
-            | grep -oP 'refs/tags/v[\d.]+$' | sort -V | tail -1 | sed 's|refs/tags/||')
+          STABLE_TAG=$(git ls-remote --tags https://github.com/PlayPro/CoreProtect.git | grep -oP 'refs/tags/v[\d.]+$' | sort -V | tail -1 | sed 's|refs/tags/||')
           echo "stable_tag=$STABLE_TAG" >> $GITHUB_OUTPUT
 
-          gh release view "stable-$STABLE_TAG" --repo ${{ github.repository }} > /dev/null 2>&1 \
-            && echo "build_stable=false" >> $GITHUB_OUTPUT \
-            || echo "build_stable=true" >> $GITHUB_OUTPUT
+          if gh release view "stable-$STABLE_TAG" --repo ${{ github.repository }} > /dev/null 2>&1; then
+            echo "build_stable=false" >> $GITHUB_OUTPUT
+          else
+            echo "build_stable=true" >> $GITHUB_OUTPUT
+          fi
 
   dev:
     needs: check
@@ -43,17 +47,18 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout CoreProtect
+        uses: actions/checkout@v4
         with:
           repository: PlayPro/CoreProtect
 
       - name: Apply patches
         run: |
           sed -i 's|<project.branch></project.branch>|<project.branch>developer</project.branch>|' pom.xml
-          sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' \
-            src/main/java/net/coreprotect/utility/VersionUtils.java
+          sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
@@ -67,14 +72,13 @@ jobs:
         run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Rename JAR
-        run: |
-          mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar \
-             target/CoreProtect-${{ steps.ver.outputs.version }}-dev+${{ needs.check.outputs.dev_short_sha }}.jar
+        run: mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar target/CoreProtect-${{ steps.ver.outputs.version }}-dev+${{ needs.check.outputs.dev_short_sha }}.jar
 
-      - uses: softprops/action-gh-release@v2
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: dev-${{ needs.check.outputs.dev_short_sha }}
-          name: "CoreProtect ${{ steps.ver.outputs.version }} Dev (${{ needs.check.outputs.dev_short_sha }})"
+          name: CoreProtect ${{ steps.ver.outputs.version }} Dev (${{ needs.check.outputs.dev_short_sha }})
           prerelease: true
           body: |
             > ⚠️ Development build — use at your own risk
@@ -89,7 +93,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout CoreProtect
+        uses: actions/checkout@v4
         with:
           repository: PlayPro/CoreProtect
           ref: ${{ needs.check.outputs.stable_tag }}
@@ -97,10 +102,10 @@ jobs:
       - name: Apply patches
         run: |
           sed -i 's|<project.branch></project.branch>|<project.branch>developer</project.branch>|' pom.xml
-          sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' \
-            src/main/java/net/coreprotect/utility/VersionUtils.java
+          sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
@@ -114,14 +119,13 @@ jobs:
         run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Rename JAR
-        run: |
-          mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar \
-             target/CoreProtect-${{ steps.ver.outputs.version }}-stable.jar
+        run: mv target/CoreProtect-${{ steps.ver.outputs.version }}.jar target/CoreProtect-${{ steps.ver.outputs.version }}-stable.jar
 
-      - uses: softprops/action-gh-release@v2
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: stable-${{ needs.check.outputs.stable_tag }}
-          name: "CoreProtect ${{ steps.ver.outputs.version }} Stable (${{ needs.check.outputs.stable_tag }})"
+          name: CoreProtect ${{ steps.ver.outputs.version }} Stable (${{ needs.check.outputs.stable_tag }})
           prerelease: false
           body: |
             Built from upstream tag `${{ needs.check.outputs.stable_tag }}`
