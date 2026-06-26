@@ -52,7 +52,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout CoreProtect
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           repository: PlayPro/CoreProtect
           persist-credentials: false
@@ -63,7 +63,7 @@ jobs:
           sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
       - name: Set up JDK 25
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
         with:
           java-version: '25'
           distribution: 'temurin'
@@ -111,7 +111,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout CoreProtect
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           repository: PlayPro/CoreProtect
           ref: ${{ needs.check.outputs.stable_tag }}
@@ -123,7 +123,7 @@ jobs:
           sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
 
       - name: Set up JDK 25
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
         with:
           java-version: '25'
           distribution: 'temurin'
