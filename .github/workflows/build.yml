@@ -86,8 +86,8 @@ jobs:
           body: |
             > ⚠️ Development build — use at your own risk
 
-            **Minecraft:** ${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}
-            **Built from:** upstream master @ `${{ needs.check.outputs.dev_sha }}`
+            **Minecraft:** `${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}`
+            Built from upstream master @ `${{ needs.check.outputs.dev_sha }}`
           files: target/CoreProtect-*.jar
 
   stable:
@@ -135,6 +135,6 @@ jobs:
           name: CoreProtect ${{ steps.ver.outputs.version }} Stable (${{ needs.check.outputs.stable_tag }})
           prerelease: false
           body: |
-            **Minecraft:** ${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}
-            **Built from:** upstream tag `${{ needs.check.outputs.stable_tag }}`
+            **Minecraft:** `${{ steps.ver.outputs.mc_min }} – ${{ steps.ver.outputs.mc_max }}`
+            Built from upstream tag `${{ needs.check.outputs.stable_tag }}`
           files: target/CoreProtect-*.jar
