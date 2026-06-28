@@ -1,6 +1,6 @@
 # coreprotect-builds
 
-Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) with Community Edition restrictions removed.
+Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect).
 
 ## Releases
 
@@ -9,7 +9,7 @@ Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) with C
 
 ## How it works
 
-A GitHub Actions workflow runs daily, checks for upstream changes, applies patches to remove CE restrictions, and publishes a new release only if something changed.
+A GitHub Actions workflow runs daily, checks for upstream changes, and publishes a new release only if something changed. Each build goes through a Paper smoke test before being published — if the plugin fails to load or logs errors on startup, the release is blocked.
 
 ## Security
 
