@@ -9,7 +9,7 @@ Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect).
 
 ## How it works
 
-A GitHub Actions workflow runs daily, checks for upstream changes, and publishes a new release only if something changed. Each build goes through a Paper smoke test before being published — if the plugin fails to load or logs errors on startup, the release is blocked.
+A GitHub Actions workflow runs daily, checks for upstream changes, and publishes a new release only if something changed. Each build goes through Paper and Folia smoke tests before being published — the required Java version is detected automatically from the server version. If the plugin fails to load or logs errors on startup, the release is blocked.
 
 ## Security
 
