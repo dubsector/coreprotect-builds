@@ -364,10 +364,230 @@ jobs:
           path: smoke-server/server.log
           retention-days: 7
 
+  folia-smoke-test-dev:
+    name: Folia Smoke Test (Dev)
+    runs-on: ubuntu-latest
+    needs: [check, build-dev]
+    permissions:
+      actions: write
+    steps:
+      - name: Download built JAR
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: plugin-jar-dev
+          path: plugin-jar/
+
+      - name: Resolve latest Folia build
+        id: folia
+        run: |
+          MC_VERSION=$(curl -fsSL "https://api.papermc.io/v2/projects/folia" | python3 -c "import sys,json; vs=json.load(sys.stdin)['versions']; print(vs[-1])")
+          BUILD=$(curl -fsSL "https://api.papermc.io/v2/projects/folia/versions/${MC_VERSION}/builds" | python3 -c "import sys,json; builds=json.load(sys.stdin)['builds']; stable=[b for b in builds if b.get('channel','')=='default']; chosen=(stable or builds)[-1]; print(chosen['build'])")
+          JAR_NAME=$(curl -fsSL "https://api.papermc.io/v2/projects/folia/versions/${MC_VERSION}/builds/${BUILD}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['downloads']['application']['name'])")
+          echo "mc_version=${MC_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "build=${BUILD}" >> "$GITHUB_OUTPUT"
+          echo "jar_name=${JAR_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Download Folia server JAR
+        env:
+          MC_VERSION: ${{ steps.folia.outputs.mc_version }}
+          BUILD: ${{ steps.folia.outputs.build }}
+          JAR_NAME: ${{ steps.folia.outputs.jar_name }}
+        run: |
+          mkdir -p smoke-server/plugins
+          curl -fsSL "https://api.papermc.io/v2/projects/folia/versions/${MC_VERSION}/builds/${BUILD}/downloads/${JAR_NAME}" -o smoke-server/folia.jar
+
+      - name: Detect required Java version
+        id: java_ver
+        env:
+          MC_VERSION: ${{ steps.folia.outputs.mc_version }}
+        run: |
+          REQUIRED=$(python3 -c "
+          import re, os
+          v = os.environ.get('MC_VERSION', '1.21')
+          parts = [int(x) for x in re.split(r'\.', v) if x.isdigit()]
+          major, minor = (parts + [0, 0])[:2]
+          print(21 if major >= 25 or (major == 1 and minor >= 21) else 17 if major == 1 and minor >= 17 else 11)
+          ")
+          echo "version=${REQUIRED}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up required JDK
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: ${{ steps.java_ver.outputs.version }}
+          distribution: 'temurin'
+
+      - name: Copy plugin JAR
+        run: cp plugin-jar/CoreProtect-*.jar smoke-server/plugins/CoreProtect.jar
+
+      - name: Configure server
+        run: |
+          echo "eula=true" > smoke-server/eula.txt
+          printf '%s\n' "online-mode=false" "level-type=flat" "generate-structures=false" "max-players=0" > smoke-server/server.properties
+
+      - name: Run server and wait for ready
+        run: |
+          cd smoke-server
+          java -Xms512m -Xmx1g -jar folia.jar --nogui > server.log 2>&1 &
+          SERVER_PID=$!
+          ELAPSED=0
+          while [ $ELAPSED -lt 120 ]; do
+            sleep 2; ELAPSED=$((ELAPSED + 2))
+            if grep -q "Done (" server.log 2>/dev/null; then
+              echo "Server ready after ${ELAPSED}s"; break
+            fi
+            if ! kill -0 $SERVER_PID 2>/dev/null; then
+              echo "Server process exited after ${ELAPSED}s"; break
+            fi
+          done
+          kill $SERVER_PID 2>/dev/null || true
+          wait $SERVER_PID 2>/dev/null || true
+
+      - name: Assert CoreProtect loaded cleanly
+        run: |
+          LOG=smoke-server/server.log
+          if grep -qiE "SEVERE.*CoreProtect|Could not load.*CoreProtect|Error.*CoreProtect" "$LOG"; then
+            echo "::error::CoreProtect logged errors on Folia startup:"
+            grep -iE "SEVERE.*CoreProtect|Could not load.*CoreProtect|Error.*CoreProtect" "$LOG"
+            exit 1
+          fi
+          if grep -q "co_skull has no column named skin" "$LOG"; then
+            echo "::error::DB migration failed — co_skull missing skin column"
+            exit 1
+          fi
+          if ! grep -q "CoreProtect has been successfully enabled" "$LOG"; then
+            cat "$LOG"
+            echo "::error::CoreProtect did not report successful enable"
+            exit 1
+          fi
+          if ! grep -q "Done (" "$LOG"; then
+            cat "$LOG"
+            echo "::error::Server did not reach ready state"
+            exit 1
+          fi
+          echo "Folia smoke test passed"
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: folia-smoke-log-dev
+          path: smoke-server/server.log
+          retention-days: 7
+
+  folia-smoke-test-stable:
+    name: Folia Smoke Test (Stable)
+    runs-on: ubuntu-latest
+    needs: [check, build-stable]
+    permissions:
+      actions: write
+    steps:
+      - name: Download built JAR
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: plugin-jar-stable
+          path: plugin-jar/
+
+      - name: Resolve latest Folia build
+        id: folia
+        run: |
+          MC_VERSION=$(curl -fsSL "https://api.papermc.io/v2/projects/folia" | python3 -c "import sys,json; vs=json.load(sys.stdin)['versions']; print(vs[-1])")
+          BUILD=$(curl -fsSL "https://api.papermc.io/v2/projects/folia/versions/${MC_VERSION}/builds" | python3 -c "import sys,json; builds=json.load(sys.stdin)['builds']; stable=[b for b in builds if b.get('channel','')=='default']; chosen=(stable or builds)[-1]; print(chosen['build'])")
+          JAR_NAME=$(curl -fsSL "https://api.papermc.io/v2/projects/folia/versions/${MC_VERSION}/builds/${BUILD}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['downloads']['application']['name'])")
+          echo "mc_version=${MC_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "build=${BUILD}" >> "$GITHUB_OUTPUT"
+          echo "jar_name=${JAR_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Download Folia server JAR
+        env:
+          MC_VERSION: ${{ steps.folia.outputs.mc_version }}
+          BUILD: ${{ steps.folia.outputs.build }}
+          JAR_NAME: ${{ steps.folia.outputs.jar_name }}
+        run: |
+          mkdir -p smoke-server/plugins
+          curl -fsSL "https://api.papermc.io/v2/projects/folia/versions/${MC_VERSION}/builds/${BUILD}/downloads/${JAR_NAME}" -o smoke-server/folia.jar
+
+      - name: Detect required Java version
+        id: java_ver
+        env:
+          MC_VERSION: ${{ steps.folia.outputs.mc_version }}
+        run: |
+          REQUIRED=$(python3 -c "
+          import re, os
+          v = os.environ.get('MC_VERSION', '1.21')
+          parts = [int(x) for x in re.split(r'\.', v) if x.isdigit()]
+          major, minor = (parts + [0, 0])[:2]
+          print(21 if major >= 25 or (major == 1 and minor >= 21) else 17 if major == 1 and minor >= 17 else 11)
+          ")
+          echo "version=${REQUIRED}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up required JDK
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
+        with:
+          java-version: ${{ steps.java_ver.outputs.version }}
+          distribution: 'temurin'
+
+      - name: Copy plugin JAR
+        run: cp plugin-jar/CoreProtect-*.jar smoke-server/plugins/CoreProtect.jar
+
+      - name: Configure server
+        run: |
+          echo "eula=true" > smoke-server/eula.txt
+          printf '%s\n' "online-mode=false" "level-type=flat" "generate-structures=false" "max-players=0" > smoke-server/server.properties
+
+      - name: Run server and wait for ready
+        run: |
+          cd smoke-server
+          java -Xms512m -Xmx1g -jar folia.jar --nogui > server.log 2>&1 &
+          SERVER_PID=$!
+          ELAPSED=0
+          while [ $ELAPSED -lt 120 ]; do
+            sleep 2; ELAPSED=$((ELAPSED + 2))
+            if grep -q "Done (" server.log 2>/dev/null; then
+              echo "Server ready after ${ELAPSED}s"; break
+            fi
+            if ! kill -0 $SERVER_PID 2>/dev/null; then
+              echo "Server process exited after ${ELAPSED}s"; break
+            fi
+          done
+          kill $SERVER_PID 2>/dev/null || true
+          wait $SERVER_PID 2>/dev/null || true
+
+      - name: Assert CoreProtect loaded cleanly
+        run: |
+          LOG=smoke-server/server.log
+          if grep -qiE "SEVERE.*CoreProtect|Could not load.*CoreProtect|Error.*CoreProtect" "$LOG"; then
+            echo "::error::CoreProtect logged errors on Folia startup:"
+            grep -iE "SEVERE.*CoreProtect|Could not load.*CoreProtect|Error.*CoreProtect" "$LOG"
+            exit 1
+          fi
+          if grep -q "co_skull has no column named skin" "$LOG"; then
+            echo "::error::DB migration failed — co_skull missing skin column"
+            exit 1
+          fi
+          if ! grep -q "CoreProtect has been successfully enabled" "$LOG"; then
+            cat "$LOG"
+            echo "::error::CoreProtect did not report successful enable"
+            exit 1
+          fi
+          if ! grep -q "Done (" "$LOG"; then
+            cat "$LOG"
+            echo "::error::Server did not reach ready state"
+            exit 1
+          fi
+          echo "Folia smoke test passed"
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: folia-smoke-log-stable
+          path: smoke-server/server.log
+          retention-days: 7
+
   publish-dev:
     name: Publish Dev Release
     runs-on: ubuntu-latest
-    needs: [check, build-dev, smoke-test-dev]
+    needs: [check, build-dev, smoke-test-dev, folia-smoke-test-dev]
     permissions:
       contents: write
       actions: read
@@ -404,7 +624,7 @@ jobs:
   publish-stable:
     name: Publish Stable Release
     runs-on: ubuntu-latest
-    needs: [check, build-stable, smoke-test-stable]
+    needs: [check, build-stable, smoke-test-stable, folia-smoke-test-stable]
     permissions:
       contents: write
       actions: read
