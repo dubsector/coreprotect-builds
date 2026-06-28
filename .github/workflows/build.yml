@@ -394,7 +394,7 @@ jobs:
             --notes "> ⚠️ Development build — use at your own risk
 
           **Minecraft:** \`${MC_MIN} – ${MC_MAX}\`
-          Built from upstream master @ \`${DEV_SHA}\`" \
+          Built from upstream master @ [${SHORT_SHA}](https://github.com/PlayPro/CoreProtect/commit/${DEV_SHA})" \
             plugin-jar/CoreProtect-*.jar
 
   publish-stable:
@@ -423,5 +423,5 @@ jobs:
             --repo "${{ github.repository }}" \
             --title "CoreProtect ${VERSION} Stable (${STABLE_TAG})" \
             --notes "**Minecraft:** \`${MC_MIN} – ${MC_MAX}\`
-          Built from upstream tag \`${STABLE_TAG}\`" \
+          Built from upstream tag [${STABLE_TAG}](https://github.com/PlayPro/CoreProtect/releases/tag/${STABLE_TAG})" \
             plugin-jar/CoreProtect-*.jar
