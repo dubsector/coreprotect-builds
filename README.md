@@ -8,7 +8,7 @@
 
 Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) compiled from source.
 
-**Download:** https://dubsector.github.io/coreprotect-builds/
+**Download page:** https://dubsector.github.io/coreprotect-builds/
 
 ## Support PlayPro
 
