@@ -163,10 +163,10 @@
       display: flex; align-items: center; justify-content: center; gap: 8px;
       background: var(--accent);
       color: #fff;
-      font-family: inherit; font-size: 15px; font-weight: 500;
+      font-family: inherit; font-size: 13.5px; font-weight: 500;
       border: none; border-radius: var(--radius);
-      padding: 0.75rem 1.5rem;
-      cursor: pointer; width: 100%;
+      padding: 0.75rem 1rem;
+      cursor: pointer; width: 100%; min-width: 0;
       transition: opacity 0.15s;
       text-decoration: none;
     }
@@ -371,7 +371,7 @@
         </div>
       </div>
       <div class="card-actions">
-        ${jar ? `<a href="${jar.browser_download_url}" class="btn-download">${dlIcon()} Download ${jar.name}</a>` : '<div class="error-msg">No JAR found in this release.</div>'}
+        ${jar ? `<a href="${jar.browser_download_url}" class="btn-download">${dlIcon()} <span>Download ${jar.name}</span></a>` : '<div class="error-msg">No JAR found in this release.</div>'}
         <div class="verify-block">
           <div class="verify-header">${shieldIcon()} Verify before installing</div>
           <div class="verify-cmd">gh attestation verify ${jarName} --repo ${REPO}
@@ -413,7 +413,7 @@ cosign verify-blob ${jarName} \\
         </div>
       </div>
       <div class="card-actions">
-        ${jar ? `<a href="${jar.browser_download_url}" class="btn-download">${dlIcon()} Download ${jar.name}</a>` : '<div class="error-msg">No JAR found in this release.</div>'}
+        ${jar ? `<a href="${jar.browser_download_url}" class="btn-download">${dlIcon()} <span>Download ${jar.name}</span></a>` : '<div class="error-msg">No JAR found in this release.</div>'}
         <div class="verify-block">
           <div class="verify-header">${shieldIcon()} Verify before installing</div>
           <div class="verify-cmd">gh attestation verify ${jarName} --repo ${REPO}
