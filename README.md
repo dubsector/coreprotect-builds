@@ -8,6 +8,13 @@
 
 Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) compiled from source.
 
+## Support PlayPro
+
+These builds patch out the donation-key check (`validDonationKey()`) so the plugin runs without one. That check exists because PlayPro relies on donations to keep developing CoreProtect — if you're getting value out of these builds, please consider supporting them directly:
+
+- [Patreon](https://www.patreon.com/coreprotect)
+- [Donation keys](https://coreprotect.net/donate/)
+
 ## Releases
 
 - **Stable** — built from the latest upstream tagged release
@@ -49,4 +56,4 @@ To report a security issue see [SECURITY.md](SECURITY.md).
 
 ## License
 
-This repository contains build automation scripts for CoreProtect. The compiled binaries distributed here are unmodified builds of [CoreProtect](https://github.com/PlayPro/CoreProtect), copyright the PlayPro contributors, distributed under the terms of the [Artistic License 2.0](LICENSE). See the upstream repository for the original source.
+This repository contains build automation scripts for CoreProtect. The compiled binaries distributed here are a Modified Version of [CoreProtect](https://github.com/PlayPro/CoreProtect) (see [Support PlayPro](#support-playpro) above for the specific change), copyright the PlayPro contributors, distributed under the terms of the [Artistic License 2.0](LICENSE). See the upstream repository for the original source.
