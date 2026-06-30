@@ -699,6 +699,9 @@ jobs:
           **Verify the JAR:**
           \`\`\`sh
           gh attestation verify ${JAR_NAME} --repo ${{ github.repository }}
+
+          cosign verify-blob ${JAR_NAME} \\
+            --bundle ${JAR_NAME}.sigstore.json
           \`\`\`" \
             plugin-jar/CoreProtect-*.jar \
             plugin-jar/CoreProtect-*.jar.sigstore.json \
@@ -803,6 +806,9 @@ jobs:
           **Verify the JAR:**
           \`\`\`sh
           gh attestation verify ${JAR_NAME} --repo ${{ github.repository }}
+
+          cosign verify-blob ${JAR_NAME} \\
+            --bundle ${JAR_NAME}.sigstore.json
           \`\`\`" \
             plugin-jar/CoreProtect-*.jar \
             plugin-jar/CoreProtect-*.jar.sigstore.json \
