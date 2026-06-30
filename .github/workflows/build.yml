@@ -591,12 +591,37 @@ jobs:
     permissions:
       contents: write
       actions: read
+      attestations: write
+      id-token: write
     steps:
       - name: Download plugin artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: plugin-jar-dev
           path: plugin-jar/
+
+      - name: Attest build provenance
+        id: attest
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: plugin-jar/CoreProtect-*.jar
+
+      - name: Copy provenance bundle for release
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          JAR=$(ls plugin-jar/CoreProtect-*.jar | head -1)
+          cp "$BUNDLE_PATH" "${JAR}.intoto.jsonl"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign JAR
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          JAR=$(ls plugin-jar/CoreProtect-*.jar)
+          cosign sign-blob --yes --bundle "${JAR}.sigstore.json" "$JAR"
 
       - name: Publish release
         env:
@@ -607,6 +632,8 @@ jobs:
           MC_MIN: ${{ needs.build-dev.outputs.mc_min }}
           MC_MAX: ${{ needs.build-dev.outputs.mc_max }}
         run: |
+          JAR=$(ls plugin-jar/CoreProtect-*.jar | head -1)
+          JAR_NAME=$(basename "$JAR")
           gh release create "dev-${SHORT_SHA}" \
             --repo "${{ github.repository }}" \
             --title "CoreProtect ${VERSION} Dev (${SHORT_SHA})" \
@@ -618,8 +645,15 @@ jobs:
           | Platform | Compatible versions |
           |----------|---------------------|
           | Paper | \`${MC_MIN} – ${MC_MAX}\` |
-          | Folia | \`${MC_MIN} – ${MC_MAX}\` |" \
-            plugin-jar/CoreProtect-*.jar
+          | Folia | \`${MC_MIN} – ${MC_MAX}\` |
+
+          **Verify the JAR:**
+          \`\`\`sh
+          gh attestation verify ${JAR_NAME} --repo ${{ github.repository }}
+          \`\`\`" \
+            plugin-jar/CoreProtect-*.jar \
+            plugin-jar/CoreProtect-*.jar.sigstore.json \
+            plugin-jar/CoreProtect-*.jar.intoto.jsonl
 
   publish-stable:
     name: Publish Stable Release
@@ -628,12 +662,37 @@ jobs:
     permissions:
       contents: write
       actions: read
+      attestations: write
+      id-token: write
     steps:
       - name: Download plugin artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: plugin-jar-stable
           path: plugin-jar/
+
+      - name: Attest build provenance
+        id: attest
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: plugin-jar/CoreProtect-*.jar
+
+      - name: Copy provenance bundle for release
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          JAR=$(ls plugin-jar/CoreProtect-*.jar | head -1)
+          cp "$BUNDLE_PATH" "${JAR}.intoto.jsonl"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign JAR
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          JAR=$(ls plugin-jar/CoreProtect-*.jar)
+          cosign sign-blob --yes --bundle "${JAR}.sigstore.json" "$JAR"
 
       - name: Publish release
         env:
@@ -643,6 +702,8 @@ jobs:
           MC_MIN: ${{ needs.build-stable.outputs.mc_min }}
           MC_MAX: ${{ needs.build-stable.outputs.mc_max }}
         run: |
+          JAR=$(ls plugin-jar/CoreProtect-*.jar | head -1)
+          JAR_NAME=$(basename "$JAR")
           gh release create "stable-${STABLE_TAG}" \
             --repo "${{ github.repository }}" \
             --title "CoreProtect ${VERSION} Stable (${STABLE_TAG})" \
@@ -651,5 +712,12 @@ jobs:
           | Platform | Compatible versions |
           |----------|---------------------|
           | Paper | \`${MC_MIN} – ${MC_MAX}\` |
-          | Folia | \`${MC_MIN} – ${MC_MAX}\` |" \
-            plugin-jar/CoreProtect-*.jar
+          | Folia | \`${MC_MIN} – ${MC_MAX}\` |
+
+          **Verify the JAR:**
+          \`\`\`sh
+          gh attestation verify ${JAR_NAME} --repo ${{ github.repository }}
+          \`\`\`" \
+            plugin-jar/CoreProtect-*.jar \
+            plugin-jar/CoreProtect-*.jar.sigstore.json \
+            plugin-jar/CoreProtect-*.jar.intoto.jsonl
