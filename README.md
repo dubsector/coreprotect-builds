@@ -49,4 +49,4 @@ To report a security issue see [SECURITY.md](SECURITY.md).
 
 ## License
 
-This repository contains build automation scripts for CoreProtect. The compiled binaries distributed here are derived from [CoreProtect](https://github.com/PlayPro/CoreProtect), copyright the PlayPro contributors, and are distributed under the terms of the [GNU General Public License v3](LICENSE).
+This repository contains build automation scripts for CoreProtect. The compiled binaries distributed here are unmodified builds of [CoreProtect](https://github.com/PlayPro/CoreProtect), copyright the PlayPro contributors, distributed under the terms of the [Artistic License 2.0](LICENSE). See the upstream repository for the original source.
