@@ -661,6 +661,8 @@ jobs:
             --prerelease \
             --notes "> ⚠️ Development build — use at your own risk
 
+          Unofficial build, not affiliated with or endorsed by PlayPro/Intelli. Modified from upstream: \`isCommunityEdition()\` is forced to \`false\`, which unlocks the \`auto-purge\` config option (see [Modifications](https://github.com/dubsector/coreprotect-builds#modifications)). Please consider [supporting PlayPro on Patreon](https://www.patreon.com/coreprotect).
+
           Built from upstream master @ [${SHORT_SHA}](https://github.com/PlayPro/CoreProtect/commit/${DEV_SHA})
 
           | Platform | Compatible versions |
@@ -768,7 +770,9 @@ jobs:
           gh release create "stable-${STABLE_TAG}" \
             --repo "${{ github.repository }}" \
             --title "CoreProtect ${VERSION} Stable (${STABLE_TAG})" \
-            --notes "Built from upstream tag [${STABLE_TAG}](https://github.com/PlayPro/CoreProtect/releases/tag/${STABLE_TAG})
+            --notes "Unofficial build, not affiliated with or endorsed by PlayPro/Intelli. Modified from upstream: \`isCommunityEdition()\` is forced to \`false\`, which unlocks the \`auto-purge\` config option (see [Modifications](https://github.com/dubsector/coreprotect-builds#modifications)). Please consider [supporting PlayPro on Patreon](https://www.patreon.com/coreprotect).
+
+          Built from upstream tag [${STABLE_TAG}](https://github.com/PlayPro/CoreProtect/releases/tag/${STABLE_TAG})
 
           | Platform | Compatible versions |
           |----------|---------------------|
