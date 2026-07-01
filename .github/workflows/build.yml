@@ -661,7 +661,7 @@ jobs:
             --prerelease \
             --notes "> ⚠️ Development build — use at your own risk
 
-          Unofficial build, not affiliated with or endorsed by PlayPro/Intelli. Modified from upstream: \`isCommunityEdition()\` is forced to \`false\`, which unlocks the \`auto-purge\` config option (see [Modifications](https://github.com/dubsector/coreprotect-builds#modifications)). Please consider [supporting PlayPro on Patreon](https://www.patreon.com/coreprotect).
+          Unofficial build, not affiliated with or endorsed by PlayPro/Intelli — bypasses the donation-key requirement for \`auto-purge\` (see [Modifications](https://github.com/dubsector/coreprotect-builds#modifications)). Please consider [supporting PlayPro on Patreon](https://www.patreon.com/coreprotect).
 
           Built from upstream master @ [${SHORT_SHA}](https://github.com/PlayPro/CoreProtect/commit/${DEV_SHA})
 

@@ -14,12 +14,7 @@ Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) compil
 
 ## Modifications
 
-This build forces `VersionUtils.isCommunityEdition()` to always return `false`. Upstream, that method normally returns `true` unless the server has a valid donation key (`validDonationKey()`) or is running an internal `edge`/`coreprotect` branch build. Forcing it to `false` everywhere:
-
-- Unlocks the `auto-purge` config option, which is otherwise omitted from the generated config for donation-key-less installs.
-- Removes the "Community Edition" label and related update-check messaging in `/co status` and the op update-nag.
-
-That's the entire diff from upstream — see [`build.yml`](.github/workflows/build.yml) for the exact `sed` patch applied at build time.
+This build bypasses the check that normally requires a donation key to unlock the `auto-purge` config option, plus some related "Community Edition" labeling. That's the entire diff from upstream — see [`build.yml`](.github/workflows/build.yml) for the exact patch applied at build time.
 
 ## Support PlayPro
 
