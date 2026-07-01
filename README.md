@@ -12,10 +12,7 @@ Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) compil
 
 ## Support PlayPro
 
-These builds patch out the donation-key check (`validDonationKey()`) so the plugin runs without one. That check exists because PlayPro relies on donations to keep developing CoreProtect — if you're getting value out of these builds, please consider supporting them directly:
-
-- [Patreon](https://www.patreon.com/coreprotect)
-- [Donation keys](https://coreprotect.net/donate/)
+These builds patch out the donation-key check (`validDonationKey()`) so the plugin runs without one. That check exists because PlayPro relies on donations to keep developing CoreProtect — if you're getting value out of these builds, please consider supporting them directly on [Patreon](https://www.patreon.com/coreprotect).
 
 ## Releases
 
