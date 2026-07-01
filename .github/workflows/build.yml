@@ -183,13 +183,7 @@ jobs:
         env:
           MC_VERSION: ${{ steps.paper.outputs.mc_version }}
         run: |
-          REQUIRED=$(python3 -c "
-          import re, os
-          v = os.environ.get('MC_VERSION', '1.21')
-          parts = [int(x) for x in re.split(r'\.', v) if x.isdigit()]
-          major, minor = (parts + [0, 0])[:2]
-          print(21 if major >= 25 or (major == 1 and minor >= 21) else 17 if major == 1 and minor >= 17 else 11)
-          ")
+          REQUIRED=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${MC_VERSION}" | python3 -c "import sys,json; print(json.load(sys.stdin)['version']['java']['version']['minimum'])")
           echo "version=${REQUIRED}" >> "$GITHUB_OUTPUT"
 
       - name: Set up required JDK
@@ -295,13 +289,7 @@ jobs:
         env:
           MC_VERSION: ${{ steps.paper.outputs.mc_version }}
         run: |
-          REQUIRED=$(python3 -c "
-          import re, os
-          v = os.environ.get('MC_VERSION', '1.21')
-          parts = [int(x) for x in re.split(r'\.', v) if x.isdigit()]
-          major, minor = (parts + [0, 0])[:2]
-          print(21 if major >= 25 or (major == 1 and minor >= 21) else 17 if major == 1 and minor >= 17 else 11)
-          ")
+          REQUIRED=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/${MC_VERSION}" | python3 -c "import sys,json; print(json.load(sys.stdin)['version']['java']['version']['minimum'])")
           echo "version=${REQUIRED}" >> "$GITHUB_OUTPUT"
 
       - name: Set up required JDK
@@ -407,13 +395,7 @@ jobs:
         env:
           MC_VERSION: ${{ steps.folia.outputs.mc_version }}
         run: |
-          REQUIRED=$(python3 -c "
-          import re, os
-          v = os.environ.get('MC_VERSION', '1.21')
-          parts = [int(x) for x in re.split(r'\.', v) if x.isdigit()]
-          major, minor = (parts + [0, 0])[:2]
-          print(21 if major >= 25 or (major == 1 and minor >= 21) else 17 if major == 1 and minor >= 17 else 11)
-          ")
+          REQUIRED=$(curl -fsSL "https://fill.papermc.io/v3/projects/folia/versions/${MC_VERSION}" | python3 -c "import sys,json; print(json.load(sys.stdin)['version']['java']['version']['minimum'])")
           echo "version=${REQUIRED}" >> "$GITHUB_OUTPUT"
 
       - name: Set up required JDK
@@ -519,13 +501,7 @@ jobs:
         env:
           MC_VERSION: ${{ steps.folia.outputs.mc_version }}
         run: |
-          REQUIRED=$(python3 -c "
-          import re, os
-          v = os.environ.get('MC_VERSION', '1.21')
-          parts = [int(x) for x in re.split(r'\.', v) if x.isdigit()]
-          major, minor = (parts + [0, 0])[:2]
-          print(21 if major >= 25 or (major == 1 and minor >= 21) else 17 if major == 1 and minor >= 17 else 11)
-          ")
+          REQUIRED=$(curl -fsSL "https://fill.papermc.io/v3/projects/folia/versions/${MC_VERSION}" | python3 -c "import sys,json; print(json.load(sys.stdin)['version']['java']['version']['minimum'])")
           echo "version=${REQUIRED}" >> "$GITHUB_OUTPUT"
 
       - name: Set up required JDK
