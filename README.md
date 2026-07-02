@@ -6,9 +6,9 @@
 [![Security Policy](https://img.shields.io/badge/Security-Policy-green)](SECURITY.md)
 [![Dependabot](https://img.shields.io/badge/Dependabot-enabled-025E8C?logo=dependabot)](https://github.com/dubsector/coreprotect-builds/network/updates)
 
-> I made this for my own server. It got out of hand.
-
 Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) compiled from source.
+
+> I made this for my own server. It got out of hand.
 
 **Download page:** https://dubsector.github.io/coreprotect-builds/
 
