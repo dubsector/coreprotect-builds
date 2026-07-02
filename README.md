@@ -14,7 +14,7 @@ Automated builds of [CoreProtect](https://github.com/PlayPro/CoreProtect) compil
 
 ## Modifications
 
-This build bypasses the check that normally requires a donation key to unlock the `auto-purge` config option, plus some related "Community Edition" labeling. That's the entire diff from upstream — see [`build.yml`](.github/workflows/build.yml) for the exact patch applied at build time.
+This build bypasses the check that normally requires a donation key to unlock the `auto-purge` config option, plus some related "Community Edition" labeling. The complete, exact source-level change is committed here: [`patches/unlock-community-edition.patch`](patches/unlock-community-edition.patch). It's applied verbatim to the upstream checkout at build time — that patch is the entire diff from upstream, nothing else is changed.
 
 ## Support PlayPro
 

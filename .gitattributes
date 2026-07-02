@@ -1,0 +1,3 @@
+# Patch files must keep byte-exact LF line endings so `git apply` matches
+# the upstream (LF) source on the Linux build runner. Never CRLF-convert them.
+*.patch -text
