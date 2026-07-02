@@ -1,5 +1,7 @@
 # coreprotect-builds
 
+> I made this for my own server. It got out of hand.
+
 [![Build](https://github.com/dubsector/coreprotect-builds/actions/workflows/build.yml/badge.svg)](https://github.com/dubsector/coreprotect-builds/actions/workflows/build.yml)
 [![Zizmor](https://github.com/dubsector/coreprotect-builds/actions/workflows/zizmor.yml/badge.svg)](https://github.com/dubsector/coreprotect-builds/actions/workflows/zizmor.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/dubsector/coreprotect-builds/badge)](https://securityscorecards.dev/viewer/?uri=github.com/dubsector/coreprotect-builds)
