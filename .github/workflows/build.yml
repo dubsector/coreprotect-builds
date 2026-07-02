@@ -61,10 +61,16 @@ jobs:
           repository: PlayPro/CoreProtect
           persist-credentials: false
 
-      - name: Apply patches
+      - name: Apply patch
+        env:
+          REPO: ${{ github.repository }}
+          REF: ${{ github.sha }}
         run: |
-          sed -i 's|<project.branch></project.branch>|<project.branch>patched</project.branch>|' pom.xml
-          sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
+          curl -fsSL "https://raw.githubusercontent.com/${REPO}/${REF}/patches/unlock-community-edition.patch" -o /tmp/unlock-community-edition.patch
+          git apply --verbose /tmp/unlock-community-edition.patch
+          if grep -q 'isBranch("coreprotect") && !validDonationKey' src/main/java/net/coreprotect/utility/VersionUtils.java; then
+            echo "::error::Patch did not neutralize isCommunityEdition() — aborting build"; exit 1
+          fi
 
       - name: Set up JDK 25
         uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
@@ -112,10 +118,16 @@ jobs:
           ref: ${{ needs.check.outputs.stable_tag }}
           persist-credentials: false
 
-      - name: Apply patches
+      - name: Apply patch
+        env:
+          REPO: ${{ github.repository }}
+          REF: ${{ github.sha }}
         run: |
-          sed -i 's|<project.branch></project.branch>|<project.branch>patched</project.branch>|' pom.xml
-          sed -i 's/return !isBranch("edge") \&\& !isBranch("coreprotect") \&\& !validDonationKey();/return false;/' src/main/java/net/coreprotect/utility/VersionUtils.java
+          curl -fsSL "https://raw.githubusercontent.com/${REPO}/${REF}/patches/unlock-community-edition.patch" -o /tmp/unlock-community-edition.patch
+          git apply --verbose /tmp/unlock-community-edition.patch
+          if grep -q 'isBranch("coreprotect") && !validDonationKey' src/main/java/net/coreprotect/utility/VersionUtils.java; then
+            echo "::error::Patch did not neutralize isCommunityEdition() — aborting build"; exit 1
+          fi
 
       - name: Set up JDK 25
         uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5

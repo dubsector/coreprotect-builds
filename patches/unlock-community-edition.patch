@@ -1,0 +1,18 @@
+diff --git a/pom.xml b/pom.xml
+index 7cf6f1c..c7ae3c3 100755
+--- a/pom.xml
++++ b/pom.xml
+@@ -6,3 +6,3 @@
+   <properties>
+-    <project.branch></project.branch>
++    <project.branch>patched</project.branch>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+diff --git a/src/main/java/net/coreprotect/utility/VersionUtils.java b/src/main/java/net/coreprotect/utility/VersionUtils.java
+index b6f484e..fdf3e7f 100644
+--- a/src/main/java/net/coreprotect/utility/VersionUtils.java
++++ b/src/main/java/net/coreprotect/utility/VersionUtils.java
+@@ -106,3 +106,3 @@ public class VersionUtils {
+     public static boolean isCommunityEdition() {
+-        return !isBranch("edge") && !isBranch("coreprotect") && !validDonationKey();
++        return false;
+     }
