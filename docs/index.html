@@ -231,6 +231,23 @@
       overflow: hidden;
     }
 
+    @media (max-width: 640px) {
+      .builds-table thead { display: none; }
+      .builds-table, .builds-table tbody, .builds-table tr, .builds-table td { display: block; width: 100%; }
+      .builds-table tr { padding: 0.75rem 1rem; }
+      .builds-table td {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 1rem; padding: 0.3rem 0; border: none;
+      }
+      .builds-table td::before {
+        content: attr(data-label);
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--muted); font-weight: 500;
+      }
+      .builds-table .td-dl { justify-content: flex-end; }
+      .builds-table .td-dl::before { content: none; }
+    }
+
     /* ── States ── */
     .loading { text-align: center; padding: 4rem 2rem; color: var(--muted); font-size: 14px; }
     .error-msg { background: #2d1b1b; border: 1px solid #6e2b2b; border-radius: var(--radius); padding: 1rem 1.25rem; color: #f85149; font-size: 14px; margin-bottom: 1.5rem; }
@@ -432,16 +449,26 @@ cosign verify-blob ${jarName} \\
 
   function buildHistoryRow(rel, type) {
     const jar = getJar(rel.assets);
-    const sha = type === 'dev' ? rel.tag_name.replace('dev-', '') : rel.tag_name.replace('stable-', '');
     const mcRange = getMcRange(rel.body);
+    const commitUrl = getCommitUrl(rel.body);
     const versionMatch = rel.name.match(/CoreProtect\s+([\d.]+(?:-\S+)?)\s+(?:Dev|Stable)/);
-    const version = versionMatch ? versionMatch[1] : sha;
+    const version = versionMatch ? versionMatch[1] : rel.tag_name;
+
+    let label, url;
+    if (type === 'dev') {
+      label = rel.tag_name.replace('dev-', '');
+      url = commitUrl || `https://github.com/PlayPro/CoreProtect/commit/${label}`;
+    } else {
+      label = getCommitLabel(rel.body, rel.tag_name);
+      url = commitUrl || `https://github.com/PlayPro/CoreProtect/releases/tag/${rel.tag_name.replace('stable-', '')}`;
+    }
+
     return `<tr>
-      <td>${version}</td>
-      <td class="td-sha">${sha}</td>
-      <td>${mcRange}</td>
-      <td>${formatDate(rel.published_at)}</td>
-      <td class="td-dl">${jar ? `<a href="${jar.browser_download_url}">${dlIcon()} Download</a>` : '—'}</td>
+      <td class="td-sha" data-label="Commit"><a href="${url}" target="_blank" rel="noopener">${label}</a></td>
+      <td data-label="Version">CoreProtect ${version}</td>
+      <td data-label="MC Versions">${mcRange}</td>
+      <td data-label="Date">${formatDate(rel.published_at)}</td>
+      <td class="td-dl" data-label="Download">${jar ? `<a href="${jar.browser_download_url}">${dlIcon()} Download</a>` : '—'}</td>
     </tr>`;
   }
 
@@ -496,7 +523,7 @@ cosign verify-blob ${jarName} \\
       <div class="builds-wrap">
         <table class="builds-table">
           <thead><tr>
-            <th>Version</th><th>Commit</th><th>MC Versions</th><th>Date</th><th></th>
+            <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th></th>
           </tr></thead>
           <tbody>${oldStable.map(r => buildHistoryRow(r, 'stable')).join('')}</tbody>
         </table>
@@ -510,7 +537,7 @@ cosign verify-blob ${jarName} \\
       <div class="builds-wrap">
         <table class="builds-table">
           <thead><tr>
-            <th>Version</th><th>Commit</th><th>MC Versions</th><th>Date</th><th></th>
+            <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th></th>
           </tr></thead>
           <tbody>${oldDev.map(r => buildHistoryRow(r, 'dev')).join('')}</tbody>
         </table>
@@ -527,6 +554,7 @@ cosign verify-blob ${jarName} \\
         document.getElementById('app').innerHTML = '<div class="loading">No releases yet.</div>';
         return;
       }
+      releases = releases.slice().sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
       const app = document.getElementById('app');
       app.innerHTML = '';
       const div = document.createElement('div');
