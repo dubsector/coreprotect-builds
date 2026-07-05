@@ -218,12 +218,19 @@
     .builds-table tbody tr:last-child { border-bottom: none; }
     .builds-table td { padding: 0.75rem 1rem; font-size: 13px; }
     .builds-table .td-sha { font-family: var(--mono); font-size: 12.5px; }
-    .builds-table .td-dl { text-align: right; }
-    .builds-table .td-dl a {
-      display: inline-flex; align-items: center; gap: 5px;
-      color: var(--accent); font-weight: 500;
+    .builds-table .jar-cell { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+    .builds-table .jar-name {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+      -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
     }
-    .builds-table .td-dl a svg { width: 14px; height: 14px; }
+    .builds-table .jar-dl-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; width: 28px; height: 28px;
+      background: var(--accent); color: #fff; border-radius: 6px;
+      transition: opacity 0.15s;
+    }
+    .builds-table .jar-dl-btn:hover { opacity: 0.88; }
+    .builds-table .jar-dl-btn svg { width: 14px; height: 14px; }
     .builds-wrap {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -244,8 +251,10 @@
         font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
         color: var(--muted); font-weight: 500;
       }
-      .builds-table .td-dl { justify-content: flex-end; }
-      .builds-table .td-dl::before { content: none; }
+      .builds-table .jar-cell { flex: 0 1 auto; min-width: 0; gap: 0.3rem; }
+      .builds-table .jar-name { font-size: 11px; }
+      .builds-table .jar-dl-btn { width: 27px; height: 27px; }
+      .builds-table .jar-dl-btn svg { width: 13px; height: 13px; }
     }
 
     /* ── States ── */
@@ -468,7 +477,11 @@ cosign verify-blob ${jarName} \\
       <td data-label="Version">CoreProtect ${version}</td>
       <td data-label="MC Versions">${mcRange}</td>
       <td data-label="Date">${formatDate(rel.published_at)}</td>
-      <td class="td-dl" data-label="Download">${jar ? `<a href="${jar.browser_download_url}">${dlIcon()} Download</a>` : '—'}</td>
+      <td class="td-jar" data-label="Jar">${jar ? `
+        <div class="jar-cell">
+          <span class="jar-name" title="${jar.name}">${jar.name}</span>
+          <a class="jar-dl-btn" href="${jar.browser_download_url}" aria-label="Download ${jar.name}">${dlIcon()}</a>
+        </div>` : '—'}</td>
     </tr>`;
   }
 
@@ -523,7 +536,7 @@ cosign verify-blob ${jarName} \\
       <div class="builds-wrap">
         <table class="builds-table">
           <thead><tr>
-            <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th></th>
+            <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th>Jar</th>
           </tr></thead>
           <tbody>${oldStable.map(r => buildHistoryRow(r, 'stable')).join('')}</tbody>
         </table>
@@ -537,7 +550,7 @@ cosign verify-blob ${jarName} \\
       <div class="builds-wrap">
         <table class="builds-table">
           <thead><tr>
-            <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th></th>
+            <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th>Jar</th>
           </tr></thead>
           <tbody>${oldDev.map(r => buildHistoryRow(r, 'dev')).join('')}</tbody>
         </table>
