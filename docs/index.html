@@ -203,7 +203,7 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       margin-bottom: 0.75rem;
     }
-    .builds-table { width: 100%; border-collapse: collapse; }
+    .builds-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     .builds-table thead th {
       font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
       color: var(--muted); font-weight: 500;
@@ -243,7 +243,7 @@
       .builds-table, .builds-table tbody, .builds-table tr, .builds-table td { display: block; width: 100%; }
       .builds-table tr { padding: 0.75rem 1rem; }
       .builds-table td {
-        display: flex; align-items: center; justify-content: space-between;
+        display: flex; align-items: baseline; justify-content: space-between;
         gap: 1rem; padding: 0.3rem 0; border: none;
       }
       .builds-table td::before {
@@ -252,9 +252,9 @@
         color: var(--muted); font-weight: 500;
       }
       .builds-table .jar-cell { flex: 0 1 auto; min-width: 0; gap: 0.3rem; }
-      .builds-table .jar-name { font-size: 11px; }
-      .builds-table .jar-dl-btn { width: 27px; height: 27px; }
-      .builds-table .jar-dl-btn svg { width: 13px; height: 13px; }
+      .builds-table .jar-name { font-size: inherit; }
+      .builds-table .jar-dl-btn { width: 40px; height: 40px; }
+      .builds-table .jar-dl-btn svg { width: 18px; height: 18px; }
     }
 
     /* ── States ── */
@@ -535,6 +535,9 @@ cosign verify-blob ${jarName} \\
       <div class="section-header" style="margin-top:1.5rem">Previous stable releases</div>
       <div class="builds-wrap">
         <table class="builds-table">
+          <colgroup>
+            <col style="width: 85px"><col style="width: 113px"><col style="width: 106px"><col style="width: 91px"><col>
+          </colgroup>
           <thead><tr>
             <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th>Jar</th>
           </tr></thead>
@@ -549,6 +552,9 @@ cosign verify-blob ${jarName} \\
       <div class="section-header" style="margin-top:1.5rem">Previous dev builds</div>
       <div class="builds-wrap">
         <table class="builds-table">
+          <colgroup>
+            <col style="width: 85px"><col style="width: 113px"><col style="width: 106px"><col style="width: 91px"><col>
+          </colgroup>
           <thead><tr>
             <th>Commit</th><th>Version</th><th>MC Versions</th><th>Date</th><th>Jar</th>
           </tr></thead>
